@@ -1,12 +1,14 @@
 from django.db import models
 from django.db.models import Sum
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Create your models here.
 
 
 # Model User (używamy wbudowanego modelu User z Django, ale możesz go dostosować)
 class Person(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, unique=True)
     payer = models.BooleanField(default=False)
     owner = models.BooleanField(default=True)
@@ -17,6 +19,7 @@ class Person(models.Model):
 
 # Model Item
 class Item(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     CATEGORY_CHOICES = [
         ("fuel", "Paliwo"),
         ("car_expenses", "Wydatki na samochód"),
@@ -49,7 +52,6 @@ class Item(models.Model):
     quantity = models.DecimalField(max_digits=10, decimal_places=0, default=1)
     # owners = models.JSONField(blank=False, default=list)
     owners = models.ManyToManyField(Person, related_name="items")
-    description = models.CharField(max_length=255)
 
     def __str__(self):
         return self.description
@@ -57,6 +59,7 @@ class Item(models.Model):
 
 # Model Receipt
 class Receipt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     TRANSACTION_CHOICES = [
         ("expense", "Expense"),
         ("income", "Income"),
@@ -80,6 +83,7 @@ class Receipt(models.Model):
 
 
 class RecentShop(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
     last_used = models.DateTimeField(auto_now=True)
 
@@ -92,6 +96,7 @@ class RecentShop(models.Model):
 
 
 class ItemPrediction(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     item_description = models.CharField(
         max_length=255, unique=True
     )  # Unique item descriptions
@@ -109,6 +114,7 @@ class ItemPrediction(models.Model):
 
 
 class Wallet(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
     total_value = models.DecimalField(max_digits=20, decimal_places=2, default=0)
     total_invest_income = models.DecimalField(
@@ -135,6 +141,7 @@ class Wallet(models.Model):
 
 
 class WalletSnapshot(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     wallet = models.ForeignKey(
         Wallet, on_delete=models.CASCADE, related_name="snapshots"
     )
@@ -149,6 +156,7 @@ class WalletSnapshot(models.Model):
 
 
 class Invest(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     wallet = models.ForeignKey(
         Wallet, on_delete=models.CASCADE, related_name="investments"
     )
@@ -179,6 +187,7 @@ class Invest(models.Model):
 
 
 class Instrument(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     CATEGORY_CHOICES = (
         ("stock", "Akcje"),
         ("etf", "ETF"),

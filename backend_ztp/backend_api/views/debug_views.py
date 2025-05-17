@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.db.models import Count
 from backend_api.models import Receipt
+from rest_framework.permissions import IsAuthenticated
 
 
 class DuplicateReceiptDebugView(APIView):
@@ -10,7 +11,7 @@ class DuplicateReceiptDebugView(APIView):
     Widok debugujący sprawdzający zduplikowane paragony
     na podstawie tych samych pól (bez ID).
     """
-
+    permission_classes = [IsAuthenticated]
     def get(self, request, *args, **kwargs):
         # Znajdowanie zduplikowanych paragonów na podstawie pól innych niż ID
         duplicates = (
@@ -34,3 +35,5 @@ class DuplicateReceiptDebugView(APIView):
                 },
                 status=status.HTTP_200_OK
             )
+
+    

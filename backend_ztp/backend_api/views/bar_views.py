@@ -3,7 +3,7 @@ from collections import defaultdict
 from decimal import Decimal
 from django.http import JsonResponse
 from django.db.models import Sum, FloatField
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from backend_api.views.utils import (
     get_query_params,
@@ -12,6 +12,7 @@ from backend_api.views.utils import (
 )
 from backend_api.models import Receipt
 from backend_api.serializers import PersonExpenseSerializer, ShopExpenseSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 @extend_schema(
@@ -34,6 +35,7 @@ from backend_api.serializers import PersonExpenseSerializer, ShopExpenseSerializ
     },
 )
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def fetch_bar_persons(request):
     try:
         selected_month = int(request.GET.get("month"))
@@ -167,6 +169,7 @@ def fetch_bar_persons(request):
     },
 )
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def fetch_bar_shops(request):
     try:
         params = get_query_params(request, "month", "year")

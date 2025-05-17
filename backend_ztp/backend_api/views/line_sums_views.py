@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter
 from backend_api.views.utils import (
@@ -8,7 +8,7 @@ from backend_api.views.utils import (
 )
 from backend_api.models import Receipt
 from datetime import date
-
+from rest_framework.permissions import IsAuthenticated
 
 @extend_schema(
     methods=["GET"],
@@ -39,6 +39,7 @@ from datetime import date
     },
 )
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def fetch_line_sums(request):
     try:
         params = get_query_params(request, "month", "year")

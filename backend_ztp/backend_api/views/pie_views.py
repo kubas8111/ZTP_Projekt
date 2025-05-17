@@ -1,4 +1,4 @@
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiResponse
 from django.db.models import Sum
@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from backend_api.views.utils import get_query_params, handle_error
 from backend_api.models import Receipt
 from backend_api.serializers import CategoryPieExpenseSerializer
-
+from rest_framework.permissions import IsAuthenticated
 
 @extend_schema(
     methods=["GET"],
@@ -32,6 +32,7 @@ from backend_api.serializers import CategoryPieExpenseSerializer
     },
 )
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def fetch_pie_categories(request):
     try:
         # Pobieramy wymagane parametry

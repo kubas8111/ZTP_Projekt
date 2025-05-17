@@ -2,6 +2,7 @@ from django.contrib import admin
 from .models import Person, Item, Receipt
 
 
+
 @admin.register(Person)
 class PersonAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "payer", "owner")  # Pola widoczne w widoku listy
