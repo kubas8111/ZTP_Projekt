@@ -7,3 +7,4 @@ migrations/
 *.sqlite3
 *.log
 *.env
+.coverage

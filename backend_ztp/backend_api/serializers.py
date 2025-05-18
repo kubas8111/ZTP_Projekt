@@ -74,11 +74,15 @@ class ReceiptSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         items_data = validated_data.pop("items", [])
-        receipt = Receipt.objects.create(**validated_data)
+        user = self.context["request"].user
+        receipt = Receipt.objects.create(user=user, **validated_data)   
 
         shop_name = validated_data.get("shop", "").strip().lower()
         if shop_name:
-            recent_shop, created = RecentShop.objects.get_or_create(name=shop_name)
+            recent_shop, created = RecentShop.objects.get_or_create(
+                    user=self.context["request"].user,
+                    name=shop_name
+                )
             if not created:
                 recent_shop.last_used = now()
                 recent_shop.save()

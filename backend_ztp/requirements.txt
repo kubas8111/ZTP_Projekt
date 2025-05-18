@@ -6,6 +6,7 @@ charset-normalizer==3.3.2
 colorama==0.4.6
 coreapi==2.3.3
 coreschema==0.0.4
+coverage==7.8.0
 Django==5.2
 django-cors-headers==4.4.0
 django-crontab==0.7.1

@@ -15,20 +15,20 @@ class ReceiptListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated]
     
     def create(self, request, *args, **kwargs):
-        serializer = ReceiptSerializer(
+        serializer = self.get_serializer(
             data=request.data, many=isinstance(request.data, list)
         )
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        self.perform_create(serializer)
         return Response(serializer.data, status=201)
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        serializer = ReceiptSerializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save()
         
     def get_queryset(self):
         return Receipt.objects.filter(user=self.request.user).order_by("payment_date").distinct()
