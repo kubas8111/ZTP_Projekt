@@ -8,3 +8,4 @@ migrations/
 *.log
 *.env
 .coverage
+.DS_Store
