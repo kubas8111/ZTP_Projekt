@@ -3,10 +3,10 @@ version: "3.9"
 services:
   web:
     build: 
-      context: wydatki_ztp
+      context: backend_ztp
       dockerfile: Dockerfile
     volumes:
-      - ./wydatki_ztp:/app
+      - ./backend_ztp:/app
     ports:
       - "8000:8000"
     depends_on:
