@@ -1,0 +1,37 @@
+name: Build frontend with PNPM
+
+on:
+    push:
+        paths:
+            - "frontend_ztp/**"
+            - ".github/workflows/build-frontend.yml"
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: frontend_ztp
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-node@v4
+              with:
+                  node-version: 22
+                  cache: "pnpm"
+
+            - uses: pnpm/action-setup@v3
+              with:
+                  version: latest
+                  run_install: true
+
+            - name: Build project
+              run: pnpm run build
+
+            - uses: actions/upload-artifact@v4
+              with:
+                  name: dist
+                  path: |
+                      dist
+                      !dist/**/*.map

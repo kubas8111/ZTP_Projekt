@@ -37,12 +37,6 @@ const defaultState: GlobalState = {
 // Tworzenie kontekstu
 const GlobalContext = createContext<GlobalState>(defaultState);
 
-const defaultPersons: Person[] = [
-    { id: 1, name: "Jan Kowalski", payer: true, owner: true },
-    { id: 2, name: "Anna Nowak", payer: true, owner: true },
-    // …inne wpisy
-];
-
 // Provider dla aplikacji
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
     children,
@@ -61,7 +55,6 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
         queryKey: ["persons"],
         queryFn: () => fetchGetPerson(),
         staleTime: 1000 * 60 * 5,
-        initialData: defaultPersons,
     });
 
     return (
@@ -82,4 +75,3 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
 
 // Hook do korzystania z GlobalContext
 export const useGlobalContext = () => useContext(GlobalContext);
-

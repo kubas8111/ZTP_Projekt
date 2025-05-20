@@ -7,7 +7,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"; // Import z shadcn
 import { Button } from "@/components/ui/button"; // Shadcn Button
-import { useGlobalContext } from "../context/GlobalContext";
+import { useGlobalContext } from "@/context/GlobalContext";
 
 interface OwnersDropdownProps {
     owners: number[];
@@ -59,4 +59,3 @@ const OwnersDropdown: React.FC<OwnersDropdownProps> = ({
 };
 
 export default OwnersDropdown;
-

@@ -70,7 +70,7 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                               category: "food_drinks",
                               value: "",
                               description: "",
-                              owners: [1, 2],
+                              owners: [],
                               quantity: 1,
                           },
                       ],
@@ -142,7 +142,7 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                         category: "food_drinks",
                         value: "",
                         description: "",
-                        owners: [1, 2],
+                        owners: [],
                         quantity: 1,
                     },
                 ],
@@ -394,4 +394,3 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
 );
 
 export default UnifiedForm;
-
