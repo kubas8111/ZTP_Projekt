@@ -1,40 +1,41 @@
-name: Build frontend with PNPM
+name: Build frontend with npm
 
 on:
-    push:
-        paths:
-            - "frontend_ztp/**"
-            - ".github/workflows/build-frontend.yml"
+    push: # uruchamiaj zawsze, na każdą gałąź
+        branches:
+            - "**"
 
 jobs:
     build:
         runs-on: ubuntu-latest
         defaults:
             run:
-                working-directory: frontend_ztp
+                working-directory: frontend_ztp # wszystkie polecenia w ./frontend_ztp
 
         steps:
+            # 1️⃣ Klon repo
             - uses: actions/checkout@v4
 
-            - uses: actions/setup-node@v4
+            # 2️⃣ Node + cache dla npm
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
               with:
-                  node-version: 22
-                  cache: "pnpm"
+                  node-version: 22 # lub inna wersja Node
+                  cache: npm # cache ~/.npm
 
-            - uses: pnpm/action-setup@v3
-              with:
-                  version: latest
-                  run_install: true
+            # 3️⃣ Instalacja zależności
+            - name: Install dependencies
+              run: npm ci --legacy-peer-deps # szybciej i deterministycznie
 
-            - name: Install deps
-              run: pnpm install --frozen-lockfile
-
+            # 4️⃣ Budowanie projektu
             - name: Build project
-              run: pnpm run build
+              run: npm run build
 
-            - uses: actions/upload-artifact@v4
+            # 5️⃣ Artefakt z buildem
+            - name: Upload dist folder
+              uses: actions/upload-artifact@v4
               with:
                   name: dist
                   path: |
-                      dist
-                      !dist/**/*.map
+                      frontend_ztp/dist
+                      !frontend_ztp/dist/**/*.map   # np. pomiń source-mapy
