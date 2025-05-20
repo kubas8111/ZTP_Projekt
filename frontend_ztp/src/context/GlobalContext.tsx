@@ -1,12 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fetchGetMe } from "@/api/apiService";
-import { Params, User, Receipt, Shops } from "@/types";
-import { getAccessToken } from "@/lib/token-storage";
+import { Params, Receipt, Shops } from "@/types";
 
 interface GlobalState {
-    user: User;
-
     receipts: Receipt[];
     setReceipts: (receipts: Receipt[]) => void;
 
@@ -21,7 +16,6 @@ interface GlobalState {
 
 // Domyślny stan
 const defaultState: GlobalState = {
-    user: {} as User,
     receipts: [],
     setReceipts: () => {},
     shops: [],
@@ -49,17 +43,9 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
         category: [],
     });
 
-    const { data: user = {} as User } = useQuery<User, Error>({
-        queryKey: ["me"],
-        queryFn: () => fetchGetMe(),
-        enabled: !!getAccessToken(),
-        staleTime: 1000 * 60 * 5,
-    });
-
     return (
         <GlobalContext.Provider
             value={{
-                user,
                 receipts,
                 setReceipts,
                 shops,

@@ -16,6 +16,7 @@ import Home from "@/pages/home";
 const Expenses = lazy(() => import("@/pages/expenses"));
 const Income = lazy(() => import("@/pages/income"));
 const Summary = lazy(() => import("@/pages/summary"));
+const Charts = lazy(() => import("@/pages/charts"));
 const Settings = lazy(() => import("@/pages/settings"));
 
 function App() {
@@ -70,7 +71,17 @@ function App() {
                                                 </Suspense>
                                             }
                                         />
-
+                                        <Route
+                                            path="/charts"
+                                            element={
+                                                <Suspense
+                                                    fallback={
+                                                        <div>Ładowanie...</div>
+                                                    }>
+                                                    <Charts />
+                                                </Suspense>
+                                            }
+                                        />
                                         <Route
                                             path="/settings"
                                             element={
