@@ -1,5 +1,5 @@
 import qs from "qs";
-import apiClient from "./apiClient";
+import { apiClient } from "./apiClient";
 import { Params, Person, Receipt } from "../types";
 
 function printStatus(status: number) {
@@ -21,7 +21,8 @@ function printStatus(status: number) {
             throw new Error("Bad request!");
         case 401:
             console.error("Unauthorized!");
-            throw new Error("Unauthorized!");
+            // throw new Error("Unauthorized!");
+            break;
         case 403:
             console.error("Forbidden!");
             throw new Error("Forbidden!");
@@ -39,7 +40,9 @@ function printStatus(status: number) {
 
 export const fetchGetPerson = async (id?: number) => {
     try {
-        const response = await apiClient.get(`/person/${id ? id + "/" : ""}`);
+        const response = await apiClient.get(
+            `/api/person/${id ? id + "/" : ""}`
+        );
         if (response.status === 200) {
             return response.data;
         } else {
@@ -53,7 +56,7 @@ export const fetchGetPerson = async (id?: number) => {
 
 export const fetchPostPerson = async (person: Person) => {
     try {
-        const response = await apiClient.post(`/person/`, person);
+        const response = await apiClient.post(`/api/person/`, person);
         if (response.status === 201) {
             return response.data;
         } else {
@@ -68,7 +71,10 @@ export const fetchPostPerson = async (person: Person) => {
 
 export const fetchPutPerson = async (person: Person) => {
     try {
-        const response = await apiClient.put(`/person/${person.id}/`, person);
+        const response = await apiClient.put(
+            `/api/person/${person.id}/`,
+            person
+        );
         if (response.status === 200) {
             return response.data;
         } else {
@@ -83,7 +89,7 @@ export const fetchPutPerson = async (person: Person) => {
 
 export const fetchDeletePerson = async (person: Person) => {
     try {
-        const response = await apiClient.delete(`/person/${person.id}/`);
+        const response = await apiClient.delete(`/api/person/${person.id}/`);
         if (response.status === 204) {
             return response.data;
         } else {
@@ -97,7 +103,7 @@ export const fetchDeletePerson = async (person: Person) => {
 
 export const fetchGetReceipts = async (params?: Params) => {
     try {
-        const response = await apiClient.get(`/receipts/`, {
+        const response = await apiClient.get(`/api/receipts/`, {
             params: params,
             paramsSerializer: (params) => {
                 return qs.stringify(params, { arrayFormat: "comma" });
@@ -124,7 +130,9 @@ export const fetchGetReceiptsByID = async (params: {
         // Wykonujemy zapytanie dla każdego ID w pętli asynchronicznie
         const responses = await Promise.all(
             params.id.map(async (receiptId) => {
-                const response = await apiClient.get(`/receipts/${receiptId}/`);
+                const response = await apiClient.get(
+                    `/api/receipts/${receiptId}/`
+                );
                 return response.data;
             })
         );
@@ -140,7 +148,7 @@ export const fetchPostReceipt = async (receipt: Receipt[]) => {
     // console.log(receipt);
     // console.log(JSON.stringify(receipt));
     try {
-        const response = await apiClient.post(`/receipts/`, receipt);
+        const response = await apiClient.post(`/api/receipts/`, receipt);
         if (response.status === 201) {
             return response.data;
         } else {
@@ -158,7 +166,7 @@ export const fetchPutReceipt = async (receiptId: number, receipt: Receipt) => {
     // console.log(JSON.stringify(receipt));
     try {
         const response = await apiClient.put(
-            `/receipts/${receiptId}/`,
+            `/api/receipts/${receiptId}/`,
             receipt
         );
         if (response.status === 200) {
@@ -175,7 +183,7 @@ export const fetchPutReceipt = async (receiptId: number, receipt: Receipt) => {
 
 export const fetchDeleteReceipt = async (receipt: Receipt) => {
     try {
-        const response = await apiClient.delete(`/receipts/${receipt.id}/`);
+        const response = await apiClient.delete(`/api/receipts/${receipt.id}/`);
         if (response.status === 204) {
             return response.data;
         } else {
@@ -193,7 +201,7 @@ export const fetchSearchRecentShops = async (query: string) => {
         if (query.length < 3) return [];
 
         // Wykonaj zapytanie do backendu
-        const response = await apiClient.get(`/recent-shops/`, {
+        const response = await apiClient.get(`/api/recent-shops/`, {
             params: { q: query },
         });
 
@@ -215,7 +223,7 @@ export const fetchItemPredictions = async (shop: string, query: string) => {
         if (query.length < 3) return [];
 
         // Wykonaj zapytanie do backendu
-        const response = await apiClient.get(`/item-predictions/`, {
+        const response = await apiClient.get(`/api/item-predictions/`, {
             params: { shop: shop, q: query },
         });
 
@@ -230,109 +238,3 @@ export const fetchItemPredictions = async (shop: string, query: string) => {
         throw error;
     }
 };
-
-export const fetchLineSums = async (params?: Params) => {
-    try {
-        const response = await apiClient.get(`/fetch/line-sums/`, {
-            params: params,
-        });
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchBarPersons = async (params?: Params) => {
-    // console.log(params);
-    // console.log(qs.stringify(params, { arrayFormat: "repeat" }));
-    try {
-        const response = await apiClient.get(`/fetch/bar-persons/`, {
-            params: params,
-            paramsSerializer: (params) => {
-                return qs.stringify(params, { arrayFormat: "repeat" });
-            },
-        });
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchBarShops = async (params?: Params) => {
-    try {
-        const response = await apiClient.get(`/fetch/bar-shops/`, {
-            params: params,
-        });
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchPieCategories = async (params?: Params) => {
-    try {
-        const response = await apiClient.get(`/fetch/pie-categories/`, {
-            params: params,
-        });
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchGetMonthlyBalance = async (params?: Params) => {
-    try {
-        const response = await apiClient.get(
-            `/fetch/is-monthly-balance-saved/`,
-            {
-                params: params,
-            }
-        );
-
-        if (response.status === 200) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchDatabaseScan = async () => {
-    try {
-        await apiClient.delete("/recent-shops/");
-        await apiClient.post("/recent-shops/");
-        await apiClient.delete("/item-prediction/");
-        await apiClient.post("/item-prediction/");
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
-

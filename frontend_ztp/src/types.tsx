@@ -37,3 +37,7 @@ export type Shops = {
     name: string;
 };
 
+export type JwtPair = {
+    access: string;
+    refresh: string;
+};
