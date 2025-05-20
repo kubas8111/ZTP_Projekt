@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("username", username);
             setUsername(username);
 
-            qc.invalidateQueries({ queryKey: ["currentUser"] });
+            qc.removeQueries();
         },
 
         onError: (err) => {
@@ -77,6 +77,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         onSuccess: async (_void, { username, password }) => {
             await loginMut.mutateAsync({ username, password });
+
+            qc.removeQueries();
         },
 
         onError: (err) => {
@@ -91,7 +93,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const logout = () => {
         localStorage.clear();
         setUsername(null);
-        qc.clear();
+        console.log("Wylogowano użytkownika");
+
+        qc.invalidateQueries({ queryKey: ["me"] });
+        qc.removeQueries();
+        console.log("Wyczyszczono cache", qc.getQueryCache().findAll());
     };
 
     return (

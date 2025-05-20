@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -13,16 +13,36 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog";
 
-import { fetchPutMe, fetchDeleteMe } from "@/api/apiService";
-import { useGlobalContext } from "@/context/GlobalContext";
+import { fetchGetMe, fetchPutMe, fetchDeleteMe } from "@/api/apiService";
+import { useAuth } from "@/context/AuthContext";
+import { User } from "@/types";
+import { toast } from "sonner";
 
 const Settings = () => {
-    const { user } = useGlobalContext();
+    const { logout } = useAuth();
     const queryClient = useQueryClient();
     const [isEditing, setIsEditing] = useState(false);
-    const [email, setEmail] = useState(user?.email || "");
+    const [email, setEmail] = useState("");
     const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
     const [password, setPassword] = useState("");
+
+    const {
+        data: user,
+        isLoading: userLoading,
+        isError: userError,
+    } = useQuery<User>({
+        queryKey: ["me"],
+        queryFn: fetchGetMe,
+        staleTime: 1000 * 60 * 5,
+        retry: false,
+        enabled: !!localStorage.getItem("username"),
+    });
+
+    useEffect(() => {
+        if (user) {
+            setEmail(user.email);
+        }
+    }, [user]);
 
     const mutation = useMutation({
         mutationFn: fetchPutMe,
@@ -35,11 +55,16 @@ const Settings = () => {
     const deleteMutation = useMutation({
         mutationFn: () => fetchDeleteMe(password),
         onSuccess: () => {
-            window.location.href = "/logout";
+            queryClient.invalidateQueries({ queryKey: ["me"] });
+            logout();
         },
     });
 
     const handleSave = () => {
+        if (!email) {
+            toast.error("Email jest wymagany");
+            return;
+        }
         mutation.mutate({ email });
     };
 
@@ -48,6 +73,14 @@ const Settings = () => {
     };
 
     if (!user) return <p>Brak danych użytkownika</p>;
+    if (userLoading) {
+        return <p>Ładowanie danych użytkownika…</p>;
+    }
+    if (userError || !user) {
+        return <p>Nie udało się pobrać danych.</p>;
+    }
+
+    console.log(user);
 
     return (
         <div className="max-w-md mx-auto mt-10 text-center">

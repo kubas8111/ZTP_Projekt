@@ -216,3 +216,54 @@ export const fetchItemPredictions = async (shop: string, query: string) => {
         throw error;
     }
 };
+
+export const fetchLineSums = async (params?: Params) => {
+    try {
+        const response = await apiClient.get(`/api/fetch/line-sums/`, {
+            params: params,
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            printStatus(response.status);
+        }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+export const fetchBarShops = async (params?: Params) => {
+    try {
+        const response = await apiClient.get(`/api/fetch/bar-shops/`, {
+            params: params,
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            printStatus(response.status);
+        }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+export const fetchPieCategories = async (params?: Params) => {
+    try {
+        const response = await apiClient.get(`/api/fetch/pie-categories/`, {
+            params: params,
+        });
+
+        if (response.status === 200) {
+            return response.data;
+        } else {
+            printStatus(response.status);
+        }
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};

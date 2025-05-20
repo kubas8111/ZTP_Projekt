@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
+import { showError } from "@/lib/toast-maker";
 
 export function RegisterForm({
     className,
@@ -44,7 +45,7 @@ export function RegisterForm({
             await register(form);
             navigate("/"); // po auto-logowaniu lądujesz na stronie głównej
         } catch (err: any) {
-            toast.error(`Registration failed: ${err.message}`);
+            showError(err);
         }
     };
 
