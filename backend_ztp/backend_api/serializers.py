@@ -1,31 +1,32 @@
 from django.utils.timezone import now
-
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 from .models import (
-    Person,
     Item,
     Receipt,
     RecentShop,
     ItemPrediction,
-    Wallet,
-    Invest,
-    Instrument,
-    WalletSnapshot,
 )
 
-
-# Serializator dla PersonPayer
-class PersonSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Person
-        fields = ["id", "name", "payer", "owner"]
+        model = User
+        fields = ["id", "username", "email"]
 
+class PersonExpenseSerializer(serializers.Serializer):
+    user = serializers.IntegerField()
+    expense_sum = serializers.FloatField()
+    receipt_ids = serializers.ListField(child=serializers.IntegerField())
+    top_outlier_receipts = serializers.ListField()
+
+class ShopExpenseSerializer(serializers.Serializer):
+    shop = serializers.CharField()
+    expense_sum = serializers.FloatField()
 
 class ItemSerializer(serializers.ModelSerializer):
-    owners = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Person.objects.all()
-    )
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    receipt = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Item
@@ -36,28 +37,15 @@ class ItemSerializer(serializers.ModelSerializer):
             "value",
             "description",
             "quantity",
-            "owners",
+            "user",
+            "receipt",
         ]
+        read_only_fields = ["save_date", "user", "receipt"]
 
-    def create(self, validated_data):
-        owners_data = validated_data.pop("owners", [])
-        item = Item.objects.create(**validated_data)
-        item.owners.set(owners_data)
-        return item
-
-    def update(self, instance, validated_data):
-        owners_data = validated_data.pop("owners", [])
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        instance.owners.set(owners_data)
-        return instance
 
 
 class ReceiptSerializer(serializers.ModelSerializer):
-    payer = serializers.PrimaryKeyRelatedField(
-        queryset=Person.objects.filter(payer=True)
-    )
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
     items = ItemSerializer(many=True)
 
     class Meta:
@@ -66,88 +54,85 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "id",
             "save_date",
             "payment_date",
-            "payer",
+            "user",
             "shop",
             "transaction_type",
             "items",
         ]
+        read_only_fields = ["save_date", "user"]
 
     def create(self, validated_data):
         items_data = validated_data.pop("items", [])
         user = self.context["request"].user
-        receipt = Receipt.objects.create(user=user, **validated_data)   
+        receipt = Receipt.objects.create(user=user, **validated_data)
 
         shop_name = validated_data.get("shop", "").strip().lower()
         if shop_name:
             recent_shop, created = RecentShop.objects.get_or_create(
-                    user=self.context["request"].user,
-                    name=shop_name
-                )
+                user=user,
+                name=shop_name
+            )
             if not created:
                 recent_shop.last_used = now()
                 recent_shop.save()
 
         for item_data in items_data:
-            item_data["owners"] = [
-                owner.id if isinstance(owner, Person) else owner
-                for owner in item_data.get("owners", [])
-            ]
-            item_serializer = ItemSerializer(data=item_data)
-            item_serializer.is_valid(raise_exception=True)
-            item = item_serializer.save()
-            receipt.items.add(item)
-
-            # self.update_item_prediction(item, receipt.shop.lower())
+            item = Item.objects.create(
+                user=user,
+                receipt=receipt,
+                **item_data
+            )
+            self.update_item_prediction(item, shop_name)
 
         return receipt
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop("items", [])
-        # Aktualizacja pozostałych pól obiektu Receipt
+        
+        # Aktualizuj pola receipt
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Czyścimy poprzednie pozycje
-        instance.items.clear()
+        # Aktualizacja RecentShop na podstawie aktualnego shop
+        shop_name = (instance.shop or "").strip().lower()
+        user = self.context["request"].user
+        if shop_name:
+            recent_shop, created = RecentShop.objects.get_or_create(
+                user=user,
+                name=shop_name
+            )
+            if not created:
+                recent_shop.last_used = now()
+                recent_shop.save()
 
-        # Przetwarzamy listę pozycji
+        # Usuń stare itemy i dodaj nowe
+        instance.item_set.all().delete()
+
         for item_data in items_data:
-            # Konwertujemy właścicieli – upewniamy się, że przekazujemy klucze główne
-            item_data["owners"] = [
-                owner.id if hasattr(owner, "id") else owner
-                for owner in item_data.get("owners", [])
-            ]
-            item_serializer = ItemSerializer(data=item_data)
-            item_serializer.is_valid(raise_exception=True)
-            item = item_serializer.save()
-            instance.items.add(item)
-
-            # Używamy instance.shop, a nie niezdefiniowanego receipt
-            # self.update_item_prediction(item, instance.shop.lower())
+            item = Item.objects.create(
+                user=user,
+                receipt=instance,
+                **item_data
+            )
+            self.update_item_prediction(item, shop_name)
 
         return instance
 
     def update_item_prediction(self, item, shop_name):
-        """
-        Aktualizuje model ItemPrediction z danymi przedmiotu z paragonu.
-        """
-        item_description = item.description.strip().lower()
-        if not item_description:
+        desc = (item.description or "").strip().lower()
+        if not desc:
             return
 
-        # Pobierz lub utwórz predykcję na podstawie opisu przedmiotu
+        from .models import ItemPrediction
+
         prediction, created = ItemPrediction.objects.get_or_create(
-            item_description=item_description
+            user=item.user,
+            item_description=desc
         )
-
-        # Zwiększ częstotliwość, jeśli predykcja już istnieje
-        if not created:
-            prediction.frequency += 1
-        else:
-            prediction.frequency = 1  # Ustaw początkową wartość częstotliwości
-
+        prediction.frequency += 1
         prediction.save()
+
 
 
 class ItemPredictionSerializer(serializers.ModelSerializer):
@@ -166,14 +151,12 @@ class ItemPredictionSerializer(serializers.ModelSerializer):
         ]
 
 
-class PersonExpenseSerializer(serializers.Serializer):
-    payer = serializers.PrimaryKeyRelatedField(
-        queryset=Person.objects.all()
-    )  # Zmieniono na ID użytkownika
+class UserExpenseSerializer(serializers.Serializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all(), required=False)
     expense_sum = serializers.FloatField()
 
     class Meta:
-        fields = ["payer", "expense_sum"]
+        fields = ["user", "expense_sum"]
 
 
 class ShopExpenseSerializer(serializers.Serializer):
@@ -185,61 +168,9 @@ class ShopExpenseSerializer(serializers.Serializer):
 
 
 class CategoryPieExpenseSerializer(serializers.Serializer):
-    category = serializers.CharField(
-        source="transactions__category"
-    )  # Poprawiona referencja
+    category = serializers.CharField(source="transactions__category")
     expense_sum = serializers.FloatField()
     fill = serializers.CharField()
 
     class Meta:
         fields = ["category", "expense_sum", "fill"]
-
-
-class InstrumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Instrument
-        fields = [
-            "id",
-            "name",
-            "symbol",
-            "category",
-            "market",
-            "currency",
-            "description",
-            "current_price",
-            "last_updated",
-        ]
-
-
-class InvestSerializer(serializers.ModelSerializer):
-    instrument = InstrumentSerializer(read_only=True)
-    instrument_id = serializers.PrimaryKeyRelatedField(
-        queryset=Instrument.objects.all(), source="instrument", write_only=True
-    )
-
-    class Meta:
-        model = Invest
-        fields = [
-            "id",
-            "wallet",
-            "instrument",
-            "instrument_id",
-            "value",
-            "current_value",
-            "payment_date",
-            "transaction_type",
-        ]
-
-
-class WalletSnapshotSerializer(serializers.ModelSerializer):
-    wallet = serializers.PrimaryKeyRelatedField(read_only=True)
-
-    class Meta:
-        model = WalletSnapshot
-        fields = [
-            "id",
-            "wallet",
-            "snapshot_date",
-            "total_value",
-            "total_invest_income",
-        ]

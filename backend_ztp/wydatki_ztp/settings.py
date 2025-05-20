@@ -210,3 +210,7 @@ if "test" in sys.argv or "test_coverage" in sys.argv:
             "NAME": ":memory:",
         }
     }
+
+DJOSER = {
+  "TOKEN_MODEL": None
+}
