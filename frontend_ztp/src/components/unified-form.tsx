@@ -10,9 +10,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
-import PayerDropdown from "@/components/payer-dropdown";
-import OwnersDropdown from "@/components/owners-dropdown";
+
 import { Item, Receipt } from "@/types";
 import { categoryOptions } from "@/lib/select-option";
 import AutoSuggestInput from "@/components/auto-suggest-input";
@@ -20,7 +20,6 @@ import { fetchSearchRecentShops, fetchItemPredictions } from "@/api/apiService";
 
 interface FormValues {
     paymentDate: string;
-    payer: number;
     shop: string;
     transactionType: "expense" | "income";
     items: Item[];
@@ -58,7 +57,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
             paymentDate: receipt
                 ? receipt.payment_date
                 : new Date().toISOString().split("T")[0],
-            payer: receipt ? receipt.payer : 1,
             shop: receipt ? receipt.shop : "",
             transactionType: transactionType,
             items:
@@ -70,7 +68,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                               category: "food_drinks",
                               value: "",
                               description: "",
-                              owners: [],
                               quantity: 1,
                           },
                       ],
@@ -116,11 +113,9 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
         };
 
         const onSubmit = (data: FormValues) => {
-            console.log(data.items[0].owners);
             const finalReceipt: Receipt = {
                 id: receipt ? receipt.id : 0,
                 payment_date: data.paymentDate,
-                payer: data.payer,
                 shop: data.shop,
                 transaction_type: data.transactionType,
                 items: data.items,
@@ -133,7 +128,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
 
             reset({
                 paymentDate: new Date().toISOString().split("T")[0],
-                payer: 1,
                 shop: "",
                 transactionType: transactionType,
                 items: [
@@ -142,7 +136,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                         category: "food_drinks",
                         value: "",
                         description: "",
-                        owners: [],
                         quantity: 1,
                     },
                 ],
@@ -188,20 +181,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
 
                         {/* Płatnik */}
                         <div className="flex justify-between gap-8 items-end">
-                            <div className="flex flex-col gpa-1">
-                                <Label htmlFor="payer">Płatnik</Label>
-                                <Controller
-                                    control={control}
-                                    name="payer"
-                                    rules={{ required: true }}
-                                    render={({ field }) => (
-                                        <PayerDropdown
-                                            payer={field.value}
-                                            setPayer={field.onChange}
-                                        />
-                                    )}
-                                />
-                            </div>
                             <Button
                                 type="button"
                                 variant="secondary"
@@ -212,7 +191,6 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                                         category: "food_drinks",
                                         value: "",
                                         description: "",
-                                        owners: [1, 2],
                                         quantity: 1,
                                     })
                                 }>
@@ -226,149 +204,131 @@ const UnifiedForm = React.forwardRef<UnifiedFormRef, UnifiedFormProps>(
                         {/* Lista pozycji */}
                         <div className="flex flex-col gap-4 border-1 rounded-md p-3">
                             {fields.map((field, index) => (
-                                <div
-                                    key={field.id}
-                                    className="grid grid-cols-3 items-end gap-8 lg:grid-cols-10">
-                                    <div className="flex flex-col gap-1 col-span-2">
-                                        <Label
-                                            htmlFor={`items.${index}.category`}>
-                                            Kategoria
-                                        </Label>
-                                        <Controller
-                                            control={control}
-                                            name={
-                                                `items.${index}.category` as const
-                                            }
-                                            rules={{ required: true }}
-                                            render={({ field }) => (
-                                                <Select
-                                                    onValueChange={
-                                                        field.onChange
-                                                    }
-                                                    value={field.value || ""}>
-                                                    <SelectTrigger className="truncate w-full">
-                                                        <SelectValue placeholder="Wybierz kategorię" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {categoryOptions[
-                                                            transactionType
-                                                        ].map((opt) => (
-                                                            <SelectItem
-                                                                key={opt.value}
-                                                                value={
-                                                                    opt.value
-                                                                }>
-                                                                {opt.label}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            )}
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col gap-1">
-                                        <Label htmlFor={`items.${index}.value`}>
-                                            Kwota
-                                        </Label>
-                                        <Input
-                                            id={`items.${index}.value`}
-                                            placeholder="Kwota"
-                                            {...register(
-                                                `items.${index}.value` as const,
-                                                { required: true }
-                                            )}
-                                        />
-                                    </div>
-
-                                    <div className="flex flex-col gap-1 col-span-3 lg:col-span-3">
-                                        <Label
-                                            htmlFor={`items.${index}.description`}>
-                                            Opis/Nazwa
-                                        </Label>
-                                        <Controller
-                                            control={control}
-                                            name={`items.${index}.description`}
-                                            rules={{ required: true }}
-                                            render={({ field }) => (
-                                                <AutoSuggestInput
-                                                    value={field.value}
-                                                    onChange={field.onChange}
-                                                    placeholder="Opis/Nazwa"
-                                                    // Przekazujemy funkcję fetchera – dodatkowo wykorzystujemy wartość sklepu
-                                                    fetcher={(query: string) =>
-                                                        fetchItemPredictions(
-                                                            shopValue,
-                                                            query
-                                                        )
-                                                    }
-                                                    transformResult={(item) =>
-                                                        item.name
-                                                    }
-                                                />
-                                            )}
-                                        />
-                                    </div>
-
-                                    {showQuantity && (
-                                        <div className="flex flex-col gap-1 col-span-1">
+                                <>
+                                    <div
+                                        key={field.id}
+                                        className="grid grid-cols-3 items-end gap-8 lg:grid-cols-8">
+                                        <div className="flex flex-col gap-1 col-span-2">
                                             <Label
-                                                htmlFor={`items.${index}.quantity`}>
-                                                Ilość
+                                                htmlFor={`items.${index}.category`}>
+                                                Kategoria
+                                            </Label>
+                                            <Controller
+                                                control={control}
+                                                name={
+                                                    `items.${index}.category` as const
+                                                }
+                                                rules={{ required: true }}
+                                                render={({ field }) => (
+                                                    <Select
+                                                        onValueChange={
+                                                            field.onChange
+                                                        }
+                                                        value={
+                                                            field.value || ""
+                                                        }>
+                                                        <SelectTrigger className="truncate w-full">
+                                                            <SelectValue placeholder="Wybierz kategorię" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {categoryOptions[
+                                                                transactionType
+                                                            ].map((opt) => (
+                                                                <SelectItem
+                                                                    key={
+                                                                        opt.value
+                                                                    }
+                                                                    value={
+                                                                        opt.value
+                                                                    }>
+                                                                    {opt.label}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            />
+                                        </div>
+
+                                        <div className="flex flex-col gap-1">
+                                            <Label
+                                                htmlFor={`items.${index}.value`}>
+                                                Kwota
                                             </Label>
                                             <Input
-                                                type="number"
-                                                id={`items.${index}.quantity`}
-                                                placeholder="Ilość"
+                                                id={`items.${index}.value`}
+                                                placeholder="Kwota"
                                                 {...register(
-                                                    `items.${index}.quantity` as const,
+                                                    `items.${index}.value` as const,
                                                     { required: true }
                                                 )}
                                             />
                                         </div>
-                                    )}
 
-                                    <div className="flex flex-col gap-1 col-span-1 lg:col-span-2">
-                                        <Label
-                                            htmlFor={`items.${index}.owners`}>
-                                            Właściciele
-                                        </Label>
-                                        <Controller
-                                            control={control}
-                                            name={
-                                                `items.${index}.owners` as const
-                                            }
-                                            rules={{ required: true }}
-                                            render={({
-                                                field: controllerField,
-                                            }) => (
-                                                <OwnersDropdown
-                                                    owners={
-                                                        controllerField.value ||
-                                                        []
-                                                    }
-                                                    setOwners={(
-                                                        newOwners: number[]
-                                                    ) => {
-                                                        // Wywołaj setter z nową tablicą ownerów
-                                                        controllerField.onChange(
-                                                            newOwners
-                                                        );
-                                                    }}
+                                        <div className="flex flex-col gap-1 col-span-3 lg:col-span-3">
+                                            <Label
+                                                htmlFor={`items.${index}.description`}>
+                                                Opis/Nazwa
+                                            </Label>
+                                            <Controller
+                                                control={control}
+                                                name={`items.${index}.description`}
+                                                rules={{ required: true }}
+                                                render={({ field }) => (
+                                                    <AutoSuggestInput
+                                                        value={field.value}
+                                                        onChange={
+                                                            field.onChange
+                                                        }
+                                                        placeholder="Opis/Nazwa"
+                                                        // Przekazujemy funkcję fetchera – dodatkowo wykorzystujemy wartość sklepu
+                                                        fetcher={(
+                                                            query: string
+                                                        ) =>
+                                                            fetchItemPredictions(
+                                                                shopValue,
+                                                                query
+                                                            )
+                                                        }
+                                                        transformResult={(
+                                                            item
+                                                        ) => item.name}
+                                                    />
+                                                )}
+                                            />
+                                        </div>
+
+                                        {showQuantity && (
+                                            <div className="flex flex-col gap-1 col-span-2 lg:col-span-1">
+                                                <Label
+                                                    htmlFor={`items.${index}.quantity`}>
+                                                    Ilość
+                                                </Label>
+                                                <Input
+                                                    type="number"
+                                                    id={`items.${index}.quantity`}
+                                                    placeholder="Ilość"
+                                                    {...register(
+                                                        `items.${index}.quantity` as const,
+                                                        { required: true }
+                                                    )}
                                                 />
-                                            )}
-                                        />
-                                    </div>
+                                            </div>
+                                        )}
 
-                                    {/* Dodatkowe pole dla właścicieli można dodać analogicznie – np. przy użyciu UnifiedDropdown */}
-                                    <Button
-                                        type="button"
-                                        variant="destructive"
-                                        className="lg:aspect-square"
-                                        onClick={() => remove(index)}>
-                                        <X />
-                                    </Button>
-                                </div>
+                                        {/* Dodatkowe pole dla właścicieli można dodać analogicznie – np. przy użyciu UnifiedDropdown */}
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            className="lg:aspect-square"
+                                            onClick={() => remove(index)}>
+                                            <X />
+                                        </Button>
+                                    </div>
+                                    {fields.length > 1 && (
+                                        <Separator className="mb-6" />
+                                    )}
+                                </>
                             ))}
                         </div>
                         {/* </ScrollArea> */}

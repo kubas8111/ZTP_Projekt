@@ -26,7 +26,6 @@ const defaultState: GlobalState = {
     shops: [],
     setShops: () => {},
     summaryFilters: {
-        owners: [],
         month: 0,
         year: 0,
         category: [],
@@ -45,7 +44,6 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [shops, setShops] = useState<Shops[]>([]);
     const [summaryFilters, setSummaryFilters] = useState<Params>({
-        owners: [],
         month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
         category: [],
