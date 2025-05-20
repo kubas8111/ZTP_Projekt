@@ -1,0 +1,11 @@
+#!/bin/bash
+
+echo "🔍 Uruchamianie testów Django z coverage..."
+coverage run manage.py test
+
+if [ $? -ne 0 ]; then
+    echo "❌ Testy nie przeszły! Commit został zablokowany."
+    exit 1
+fi
+
+echo "✅ Testy przeszły. Kontynuuję commit."
