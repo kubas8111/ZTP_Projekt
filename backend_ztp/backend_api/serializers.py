@@ -9,7 +9,6 @@ from .models import (
     ItemPrediction,
 )
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
