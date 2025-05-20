@@ -45,8 +45,8 @@ class ItemSerializer(serializers.ModelSerializer):
 
 
 class ReceiptSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
     items = ItemSerializer(many=True)
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = Receipt
@@ -59,15 +59,11 @@ class ReceiptSerializer(serializers.ModelSerializer):
             "transaction_type",
             "items",
         ]
-        read_only_fields = ["save_date", "user"]
+        read_only_fields = ["id", "save_date", "user"]
 
-    def create(self, validated_data):
-        items_data = validated_data.pop("items", [])
-        user = self.context["request"].user
-        receipt = Receipt.objects.create(user=user, **validated_data)
-
-        shop_name = validated_data.get("shop", "").strip().lower()
+    def _update_recent_shop(self, user, shop_name):
         if shop_name:
+            from .models import RecentShop
             recent_shop, created = RecentShop.objects.get_or_create(
                 user=user,
                 name=shop_name
@@ -75,6 +71,27 @@ class ReceiptSerializer(serializers.ModelSerializer):
             if not created:
                 recent_shop.last_used = now()
                 recent_shop.save()
+
+    def update_item_prediction(self, item, shop_name):
+        desc = (item.description or "").strip().lower()
+        if not desc:
+            return
+        from .models import ItemPrediction
+
+        prediction, created = ItemPrediction.objects.get_or_create(
+            user=item.user,
+            item_description=desc
+        )
+        prediction.frequency += 1
+        prediction.save()
+
+    def create(self, validated_data):
+        items_data = validated_data.pop("items", [])
+        user = self.context["request"].user
+        receipt = Receipt.objects.create(user=user, **validated_data)
+
+        shop_name = validated_data.get("shop", "").strip().lower()
+        self._update_recent_shop(user, shop_name)
 
         for item_data in items_data:
             item = Item.objects.create(
@@ -88,26 +105,17 @@ class ReceiptSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         items_data = validated_data.pop("items", [])
-        
-        # Aktualizuj pola receipt
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
 
-        # Aktualizacja RecentShop na podstawie aktualnego shop
         shop_name = (instance.shop or "").strip().lower()
         user = self.context["request"].user
-        if shop_name:
-            recent_shop, created = RecentShop.objects.get_or_create(
-                user=user,
-                name=shop_name
-            )
-            if not created:
-                recent_shop.last_used = now()
-                recent_shop.save()
+        self._update_recent_shop(user, shop_name)
 
-        # Usuń stare itemy i dodaj nowe
-        instance.item_set.all().delete()
+        # Remove and recreate items
+        instance.items.all().delete()
 
         for item_data in items_data:
             item = Item.objects.create(
@@ -118,20 +126,6 @@ class ReceiptSerializer(serializers.ModelSerializer):
             self.update_item_prediction(item, shop_name)
 
         return instance
-
-    def update_item_prediction(self, item, shop_name):
-        desc = (item.description or "").strip().lower()
-        if not desc:
-            return
-
-        from .models import ItemPrediction
-
-        prediction, created = ItemPrediction.objects.get_or_create(
-            user=item.user,
-            item_description=desc
-        )
-        prediction.frequency += 1
-        prediction.save()
 
 
 
