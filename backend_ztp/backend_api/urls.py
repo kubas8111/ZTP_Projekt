@@ -3,7 +3,6 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.routers import DefaultRouter
 
 from backend_api.views import (
-    PersonViewSet,
     ItemViewSet,
     ReceiptListCreateView,
     ReceiptUpdateDestroyView,
@@ -13,19 +12,12 @@ from backend_api.views import (
     fetch_bar_persons,
     fetch_bar_shops,
     fetch_pie_categories,
-    InstrumentViewSet,
-    InvestViewSet,
-    WalletSnapshotViewSet,
     DuplicateReceiptDebugView
 )
 
 router = DefaultRouter()
 
-router.register(r"person", PersonViewSet)
 router.register(r"items", ItemViewSet)
-router.register(r"instruments", InstrumentViewSet)
-router.register(r"invests", InvestViewSet)
-router.register(r"wallet-snapshots", WalletSnapshotViewSet)
 # router.register(r"receipts", ReceiptViewSet)
 
 urlpatterns = [
