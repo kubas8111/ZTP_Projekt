@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchGetPerson } from "@/api/apiService";
-import { Params, Person, Receipt, Shops } from "@/types";
+import { fetchGetMe } from "@/api/apiService";
+import { Params, User, Receipt, Shops } from "@/types";
 
 interface GlobalState {
-    persons: Person[];
+    user: User;
 
     receipts: Receipt[];
     setReceipts: (receipts: Receipt[]) => void;
@@ -20,7 +20,7 @@ interface GlobalState {
 
 // Domyślny stan
 const defaultState: GlobalState = {
-    persons: [],
+    user: {} as User,
     receipts: [],
     setReceipts: () => {},
     shops: [],
@@ -40,7 +40,6 @@ const GlobalContext = createContext<GlobalState>(defaultState);
 export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
     children,
 }) => {
-    // const [persons, setPersons] = useState<Person[]>([]);
     const [receipts, setReceipts] = useState<Receipt[]>([]);
     const [shops, setShops] = useState<Shops[]>([]);
     const [summaryFilters, setSummaryFilters] = useState<Params>({
@@ -49,16 +48,16 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
         category: [],
     });
 
-    const { data: persons = [] } = useQuery<Person[], Error>({
-        queryKey: ["persons"],
-        queryFn: () => fetchGetPerson(),
+    const { data: user = {} as User } = useQuery<User, Error>({
+        queryKey: ["me"],
+        queryFn: () => fetchGetMe(),
         staleTime: 1000 * 60 * 5,
     });
 
     return (
         <GlobalContext.Provider
             value={{
-                persons,
+                user,
                 receipts,
                 setReceipts,
                 shops,

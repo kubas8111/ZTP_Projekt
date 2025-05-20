@@ -1,6 +1,6 @@
 import qs from "qs";
 import { apiClient } from "./apiClient";
-import { Params, Person, Receipt } from "../types";
+import { Params, Receipt, User } from "@/types";
 
 function printStatus(status: number) {
     switch (status) {
@@ -38,66 +38,44 @@ function printStatus(status: number) {
     }
 }
 
-export const fetchGetPerson = async (id?: number) => {
+export const fetchGetMe = async () => {
     try {
-        const response = await apiClient.get(
-            `/api/person/${id ? id + "/" : ""}`
-        );
+        const response = await apiClient.get(`/auth/users/me/`);
         if (response.status === 200) {
             return response.data;
         } else {
             printStatus(response.status);
         }
     } catch (error) {
-        console.error(error);
+        console.error("Błąd podczas pobierania danych użytkownika:", error);
         throw error;
     }
 };
 
-export const fetchPostPerson = async (person: Person) => {
+export const fetchPutMe = async (
+    data: Partial<Pick<User, "email" | "avatar">>
+) => {
     try {
-        const response = await apiClient.post(`/api/person/`, person);
-        if (response.status === 201) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.warn(JSON.stringify(person));
-        console.error(error);
-        throw error;
-    }
-};
-
-export const fetchPutPerson = async (person: Person) => {
-    try {
-        const response = await apiClient.put(
-            `/api/person/${person.id}/`,
-            person
-        );
+        const response = await apiClient.put(`/auth/users/me/`, data);
         if (response.status === 200) {
             return response.data;
         } else {
             printStatus(response.status);
         }
     } catch (error) {
-        console.warn(JSON.stringify(person));
-        console.error(error);
+        console.error("Błąd podczas aktualizacji danych użytkownika:", error);
         throw error;
     }
 };
 
-export const fetchDeletePerson = async (person: Person) => {
-    try {
-        const response = await apiClient.delete(`/api/person/${person.id}/`);
-        if (response.status === 204) {
-            return response.data;
-        } else {
-            printStatus(response.status);
-        }
-    } catch (error) {
-        console.error(error);
-        throw error;
+export const fetchDeleteMe = async (password: string) => {
+    const response = await apiClient.delete("/auth/users/me/", {
+        data: { current_password: password },
+    });
+    if (response.status === 204) {
+        return true;
+    } else {
+        printStatus(response.status);
     }
 };
 

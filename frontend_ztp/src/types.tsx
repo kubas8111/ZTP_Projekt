@@ -1,8 +1,8 @@
-export type Person = {
+export type User = {
     id: number;
-    name: string;
-    payer: boolean;
-    owner: boolean;
+    username: string;
+    email: string;
+    avatar?: string;
 };
 
 export type Item = {
