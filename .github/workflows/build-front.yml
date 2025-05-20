@@ -22,6 +22,7 @@ jobs:
               with:
                   node-version: 22 # lub inna wersja Node
                   cache: npm # cache ~/.npm
+                  cache-dependency-path: frontend_ztp/package-lock.json
 
             # 3️⃣ Instalacja zależności
             - name: Install dependencies
@@ -38,4 +39,4 @@ jobs:
                   name: dist
                   path: |
                       frontend_ztp/dist
-                      !frontend_ztp/dist/**/*.map   # np. pomiń source-mapy
+                      !frontend_ztp/dist/**/*.map
