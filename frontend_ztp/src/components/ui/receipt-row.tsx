@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useGlobalContext } from "@/context/GlobalContext";
 import { Receipt } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
