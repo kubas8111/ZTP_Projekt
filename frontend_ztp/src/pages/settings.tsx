@@ -15,9 +15,11 @@ import {
 
 import { fetchPutMe, fetchDeleteMe } from "@/api/apiService";
 import { useGlobalContext } from "@/context/GlobalContext";
+import { useAuth } from "@/context/AuthContext";
 
 const Settings = () => {
     const { user } = useGlobalContext();
+    const { logout } = useAuth();
     const queryClient = useQueryClient();
     const [isEditing, setIsEditing] = useState(false);
     const [email, setEmail] = useState(user?.email || "");
@@ -35,7 +37,8 @@ const Settings = () => {
     const deleteMutation = useMutation({
         mutationFn: () => fetchDeleteMe(password),
         onSuccess: () => {
-            window.location.href = "/logout";
+            queryClient.invalidateQueries({ queryKey: ["me"] });
+            logout();
         },
     });
 

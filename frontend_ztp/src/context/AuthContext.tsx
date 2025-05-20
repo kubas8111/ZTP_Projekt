@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("username", username);
             setUsername(username);
 
-            qc.invalidateQueries({ queryKey: ["currentUser"] });
+            qc.invalidateQueries({ queryKey: ["me"] });
         },
 
         onError: (err) => {
@@ -77,6 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         onSuccess: async (_void, { username, password }) => {
             await loginMut.mutateAsync({ username, password });
+            qc.invalidateQueries({ queryKey: ["me"] });
         },
 
         onError: (err) => {

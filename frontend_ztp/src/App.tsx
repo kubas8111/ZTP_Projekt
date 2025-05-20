@@ -34,6 +34,7 @@ function App() {
                                         path="/register"
                                         element={<Register />}
                                     />
+
                                     <Route element={<PrivateRoute />}>
                                         <Route path="/" element={<Home />} />
                                         <Route

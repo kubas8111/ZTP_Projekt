@@ -12,7 +12,8 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { toast } from "sonner";
+import { showError } from "@/lib/toast-maker";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm({
     className,
@@ -23,6 +24,8 @@ export function LoginForm({
 
     const [form, setForm] = useState({ username: "", password: "" });
 
+    const queryClient = useQueryClient();
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setForm({ ...form, [e.target.id]: e.target.value });
 
@@ -30,14 +33,15 @@ export function LoginForm({
         e.preventDefault();
 
         try {
-            const response = await login(form.username, form.password);
-            console.log(response);
+            await login(form.username, form.password);
+            await queryClient.invalidateQueries({ queryKey: ["me"] });
             navigate("/");
         } catch (err: any) {
             if (import.meta.env.DEV) {
-                console.log(JSON.stringify(form, null, 2));
+                // console.log(JSON.stringify(form, null, 2));
+                console.log(err);
             }
-            toast.error(`Login failed: ${err.message}`);
+            showError(err);
         }
     };
 
@@ -104,4 +108,3 @@ export function LoginForm({
         </div>
     );
 }
-
