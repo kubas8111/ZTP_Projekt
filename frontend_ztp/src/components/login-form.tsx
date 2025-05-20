@@ -13,7 +13,6 @@ import { useAuth } from "@/context/AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { showError } from "@/lib/toast-maker";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function LoginForm({
     className,
@@ -24,8 +23,6 @@ export function LoginForm({
 
     const [form, setForm] = useState({ username: "", password: "" });
 
-    const queryClient = useQueryClient();
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setForm({ ...form, [e.target.id]: e.target.value });
 
@@ -34,7 +31,6 @@ export function LoginForm({
 
         try {
             await login(form.username, form.password);
-            await queryClient.invalidateQueries({ queryKey: ["me"] });
             navigate("/");
         } catch (err: any) {
             if (import.meta.env.DEV) {

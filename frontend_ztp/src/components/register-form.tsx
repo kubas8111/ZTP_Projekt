@@ -15,7 +15,6 @@ import { useAuth } from "@/context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "sonner";
 import { showError } from "@/lib/toast-maker";
-import { useQueryClient } from "@tanstack/react-query";
 
 export function RegisterForm({
     className,
@@ -31,8 +30,6 @@ export function RegisterForm({
         re_password: "",
     });
 
-    const queryClient = useQueryClient();
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
         setForm({ ...form, [e.target.id]: e.target.value });
 
@@ -46,7 +43,6 @@ export function RegisterForm({
 
         try {
             await register(form);
-            await queryClient.invalidateQueries({ queryKey: ["me"] });
             navigate("/"); // po auto-logowaniu lądujesz na stronie głównej
         } catch (err: any) {
             showError(err);

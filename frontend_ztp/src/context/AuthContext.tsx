@@ -52,7 +52,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             localStorage.setItem("username", username);
             setUsername(username);
 
-            qc.invalidateQueries({ queryKey: ["me"] });
+            qc.resetQueries({ queryKey: ["me"] }); // czyści błąd + retryCount
+            qc.refetchQueries({ queryKey: ["me"] }); // wymusza natychmiastowy fetch
         },
 
         onError: (err) => {
@@ -93,6 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.clear();
         setUsername(null);
         qc.clear();
+        qc.resetQueries({ queryKey: ["me"] });
+        qc.refetchQueries({ queryKey: ["me"] });
     };
 
     return (

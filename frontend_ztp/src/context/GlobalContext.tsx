@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchGetMe } from "@/api/apiService";
 import { Params, User, Receipt, Shops } from "@/types";
+import { getAccessToken } from "@/lib/token-storage";
 
 interface GlobalState {
     user: User;
@@ -51,6 +52,7 @@ export const GlobalProvider: React.FC<{ children: ReactNode }> = ({
     const { data: user = {} as User } = useQuery<User, Error>({
         queryKey: ["me"],
         queryFn: () => fetchGetMe(),
+        enabled: !!getAccessToken(),
         staleTime: 1000 * 60 * 5,
     });
 
