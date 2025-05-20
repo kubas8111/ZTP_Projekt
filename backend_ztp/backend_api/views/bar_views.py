@@ -18,13 +18,6 @@ from rest_framework.permissions import IsAuthenticated
     methods=["GET"],
     parameters=[
         OpenApiParameter(
-            name="users[]",
-            description="IDs of selected users (owners of items)",
-            required=False,
-            type=int,
-            many=True,
-        ),
-        OpenApiParameter(
             name="month", description="Selected month", required=True, type=int
         ),
         OpenApiParameter(
@@ -32,33 +25,16 @@ from rest_framework.permissions import IsAuthenticated
         ),
         OpenApiParameter(
             name="category[]",
-            description="Selected category",
+            description="Selected categories",
             required=False,
             type=str,
             many=True,
-            enum=[  # wszystkie możliwe kategorie z modelu Item
-                "fuel",
-                "car_expenses",
-                "fastfood",
-                "alcohol",
-                "food_drinks",
-                "chemistry",
-                "clothes",
-                "electronics_games",
-                "tickets_entrance",
-                "delivery",
-                "other_shopping",
-                "flat_bills",
-                "monthly_subscriptions",
-                "other_cyclical_expenses",
-                "investments_savings",
-                "other",
-                "for_study",
-                "work_income",
-                "family_income",
-                "investments_income",
-                "money_back",
-                "last_month_balance",
+            enum=[
+                "fuel", "car_expenses", "fastfood", "alcohol", "food_drinks", "chemistry",
+                "clothes", "electronics_games", "tickets_entrance", "delivery", "other_shopping",
+                "flat_bills", "monthly_subscriptions", "other_cyclical_expenses", "investments_savings",
+                "other", "for_study", "work_income", "family_income", "investments_income",
+                "money_back", "last_month_balance"
             ],
         ),
     ],
@@ -72,57 +48,47 @@ from rest_framework.permissions import IsAuthenticated
 @permission_classes([IsAuthenticated])
 def fetch_bar_shops(request):
     try:
-        # Podstawowe parametry
+        # Pobierz miesiąc i rok z parametrów GET
         params = get_query_params(request, "month", "year")
         selected_month = params["month"]
         selected_year = params["year"]
 
-        # Lista użytkowników
-        user_param = request.GET.getlist("users[]")
-        selected_user_ids = [int(uid) for uid in user_param] if user_param else []
-        if not selected_user_ids:
-            return handle_error("Nie podano users", 400, "Brak parametru users")
+        # Ustal aktualnego użytkownika
+        current_user = request.user
 
-        # Kategorie
+        # Kategorie – domyślnie kilka najczęstszych
         category_param = request.GET.getlist("category[]")
         category = category_param or [
-            "fuel",
-            "car_expenses",
-            "fastfood",
-            "alcohol",
-            "food_drinks",
-            "chemistry",
-            "clothes",
-            "electronics_games",
-            "tickets_entrance",
-            "delivery",
-            "other_shopping",
+            "fuel", "car_expenses", "fastfood", "alcohol", "food_drinks", "chemistry",
+            "clothes", "electronics_games", "tickets_entrance", "delivery", "other_shopping"
         ]
-
     except ValueError as e:
         return handle_error(e, 400, "Niepoprawne parametry zapytania")
 
     try:
+        # Filtrowanie paragonów użytkownika
         queryset = (
             Receipt.objects.filter(
                 transaction_type="expense",
                 payment_date__year=selected_year,
                 payment_date__month=selected_month,
                 items__category__in=category,
-                items__user__id__in=selected_user_ids,
+                items__user=current_user,
             )
             .values("shop")
             .annotate(expense_sum=Sum("items__value", output_field=FloatField()))
         )
+
         sorted_expense_sums = queryset.order_by("-expense_sum")
         serialized_data = [
             {"shop": entry["shop"], "expense_sum": round(entry["expense_sum"], 2)}
             for entry in sorted_expense_sums
         ]
+
         serializer = ShopExpenseSerializer(data=serialized_data, many=True)
         if serializer.is_valid():
             return JsonResponse(serializer.data, safe=False, status=200)
         else:
             return JsonResponse(serializer.errors, status=400)
     except Exception as e:
-        return handle_error(e, 500, "Error while fetching bar shops")
+        return handle_error(e, 500, "Błąd podczas pobierania danych wydatków")
