@@ -5,8 +5,21 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+# Model Receipt
+class Receipt(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    TRANSACTION_CHOICES = [
+        ("expense", "Expense"),
+        ("income", "Income"),
+    ]
+    save_date = models.DateField(auto_now_add=True, null=True)
+    payment_date = models.DateField()
 
-# Model User (używamy wbudowanego modelu User z Django, ale możesz go dostosować)
+    shop = models.CharField(max_length=255)
+    transaction_type = models.CharField(max_length=255, choices=TRANSACTION_CHOICES)
+
+    def __str__(self):
+        return f"Receipt {self.id}"
 
 # Model Item
 class Item(models.Model):
@@ -41,40 +54,15 @@ class Item(models.Model):
     value = models.DecimalField(max_digits=10, decimal_places=2)
     description = models.CharField(max_length=255, blank=True, null=True, default="")
     quantity = models.DecimalField(max_digits=10, decimal_places=0, default=1)
-    # owners = models.JSONField(blank=False, default=list)
-    owners = models.ManyToManyField(User, related_name="items")
+    receipt = models.ForeignKey(Receipt, on_delete=models.CASCADE, null=True, blank=True, related_name="items")
 
     def __str__(self):
         return self.description
 
 
-# Model Receipt
-class Receipt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    TRANSACTION_CHOICES = [
-        ("expense", "Expense"),
-        ("income", "Income"),
-    ]
-    save_date = models.DateField(auto_now_add=True, null=True)
-    payment_date = models.DateField()
-    payer = models.ForeignKey(
-        User,
-        related_name="payer_receipts",
-        on_delete=models.CASCADE,
-    )
-
-    shop = models.CharField(max_length=255)
-    transaction_type = models.CharField(max_length=255, choices=TRANSACTION_CHOICES)
-    items = models.ManyToManyField(Item, related_name="receipts")
-    payment_date = models.DateField()
-
-    def __str__(self):
-        return f"Receipt {self.id}"
-
-
 class RecentShop(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255, unique=True)
+    name = models.CharField(max_length=255, unique=False)
     last_used = models.DateTimeField(auto_now=True)
 
     def save(self, *args, **kwargs):
@@ -87,12 +75,8 @@ class RecentShop(models.Model):
 
 class ItemPrediction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    item_description = models.CharField(
-        max_length=255, unique=True
-    )  # Unique item descriptions
-    frequency = models.PositiveIntegerField(
-        default=0
-    )  # Frequency of item occurrence in receipts
+    item_description = models.CharField(max_length=255, unique=False)
+    frequency = models.PositiveIntegerField(default=0)
 
     def increment_frequency(self):
         """Increase the frequency of the item."""

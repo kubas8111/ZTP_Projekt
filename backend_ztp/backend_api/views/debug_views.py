@@ -15,7 +15,7 @@ class DuplicateReceiptDebugView(APIView):
     def get(self, request, *args, **kwargs):
         # Znajdowanie zduplikowanych paragonów na podstawie pól innych niż ID
         duplicates = (
-            Receipt.objects.values("payment_date", "payer", "shop", "transaction_type")
+            Receipt.objects.values("payment_date", "user", "shop", "transaction_type")
             .annotate(count=Count("*"))
             .filter(count__gt=1)
         )

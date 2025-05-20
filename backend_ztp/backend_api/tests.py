@@ -36,7 +36,6 @@ class ReceiptModelTest(TestCase):
             shop="Shell",
             transaction_type="expense",
             payment_date=date.today(),
-            payer=user
         )
         receipt.items.add(item)
         self.assertEqual(receipt.shop, "Shell")

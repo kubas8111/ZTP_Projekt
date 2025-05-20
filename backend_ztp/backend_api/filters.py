@@ -3,18 +3,16 @@ from .models import Item, Receipt
 
 
 class ItemFilter(filters.FilterSet):
-    owners = filters.CharFilter(field_name="owners", lookup_expr="exact")
+    user = filters.CharFilter(field_name="user", lookup_expr="exact")
 
     class Meta:
         model = Item
-        fields = ["owners"]
+        fields = ["user"]
 
 
 class ReceiptFilter(filters.FilterSet):
-    # owners = filters.CharFilter(field_name="items__owner", lookup_expr="exact")
     id = filters.NumberFilter(field_name="id", lookup_expr="exact")
-    owners = filters.BaseInFilter(field_name="items__owners__id", lookup_expr="in")
-    payer = filters.CharFilter(field_name="payer", lookup_expr="exact")
+    user = filters.BaseInFilter(field_name="user", lookup_expr="in")
     shop = filters.CharFilter(field_name="shop", lookup_expr="icontains")
     day = filters.NumberFilter(field_name="payment_date", lookup_expr="day")
     month = filters.NumberFilter(field_name="payment_date", lookup_expr="month")
@@ -30,8 +28,7 @@ class ReceiptFilter(filters.FilterSet):
     class Meta:
         model = Receipt
         fields = [
-            "owners",
-            "payer",
+            "user",
             "month",
             "year",
             "payment_date",
