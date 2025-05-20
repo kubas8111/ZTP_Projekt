@@ -21,6 +21,7 @@ import {
     Home,
     TrendingDown,
     TrendingUp,
+    DollarSign,
     Settings,
     ChevronUp,
 } from "lucide-react";
@@ -30,6 +31,7 @@ const menuItems = [
     { title: "Dashboard", path: "/", icon: Home },
     { title: "Wydatki", path: "/expenses", icon: TrendingDown },
     { title: "Przychody", path: "/income", icon: TrendingUp },
+    { title: "Podsumowanie", path: "/summary", icon: DollarSign },
     { title: "Ustawienia", path: "/settings", icon: Settings },
 ];
 

@@ -11,13 +11,11 @@ export type Item = {
     value: string;
     description: string;
     quantity: number;
-    owners: number[];
 };
 
 export type Receipt = {
     id: number;
     payment_date: string;
-    payer: number;
     shop: string;
     transaction_type: string;
     items: Item[];
@@ -25,7 +23,6 @@ export type Receipt = {
 
 export type Params = {
     id?: number;
-    owners: number[];
     month?: number;
     year?: number;
     category?: string[];

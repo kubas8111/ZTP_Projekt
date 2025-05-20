@@ -44,7 +44,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>
-                <header className="flex justify-between h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+                <header className="sticky top-0 z-20 flex justify-between h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 bg-background/80 backdrop-blur ">
                     <div className="flex items-center gap-2 px-4">
                         <SidebarTrigger className="-ml-1 h-9 w-9" />
                         <Separator
@@ -83,7 +83,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                         <ModeToggle />
                     </div>
                 </header>
-                <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+                <div className="overflow-y-auto flex flex-1 flex-col gap-4 px-4 pt-0">
                     {children}
                 </div>
                 <Toaster />
@@ -91,4 +91,3 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </SidebarProvider>
     );
 }
-

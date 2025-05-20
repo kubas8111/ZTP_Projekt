@@ -15,6 +15,7 @@ import Home from "@/pages/home";
 // Pozostałe strony ładujemy dynamicznie
 const Expenses = lazy(() => import("@/pages/expenses"));
 const Income = lazy(() => import("@/pages/income"));
+const Summary = lazy(() => import("@/pages/summary"));
 const Settings = lazy(() => import("@/pages/settings"));
 
 function App() {
@@ -57,6 +58,18 @@ function App() {
                                                 </Suspense>
                                             }
                                         />
+                                        <Route
+                                            path="/summary"
+                                            element={
+                                                <Suspense
+                                                    fallback={
+                                                        <div>Ładowanie...</div>
+                                                    }>
+                                                    <Summary />
+                                                </Suspense>
+                                            }
+                                        />
+
                                         <Route
                                             path="/settings"
                                             element={
