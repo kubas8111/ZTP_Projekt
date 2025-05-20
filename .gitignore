@@ -9,3 +9,4 @@ migrations/
 *.env
 .coverage
 .DS_Store
+backend_ztp/django_error.log
