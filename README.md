@@ -1,4 +1,4 @@
-# ZTP_Projekt# 💸 Expense Tracker — Your Next-Gen Personal Finance Dashboard
+# ZTP_Projekt 💸 Expense Tracker — Your Next-Gen Personal Finance Dashboard
 
 Welcome to **Expense Tracker** — a sleek, fullstack web application designed to give you **total control over your spending, budgeting, and future investments**.
 
@@ -14,13 +14,11 @@ As someone who cares about where my money goes (and why it disappears so fast), 
 
 ## ✨ Key Features
 
-✅ **Multi-user budgeting** — manage finances for you own way.
 ✅ **Custom expense categories** — groceries, rent, fun stuff, crypto — your call.  
 ✅ **Interactive charts** — visualize your financial health in a glance.  
 ✅ **Modern UI/UX** — built with **React 19 + TailwindCSS + Radix UI**.  
 ✅ **Fast backend** — powered by **Django 5 + Django REST Framework**.  
 ✅ **Secure & scalable** — designed for real use and future growth.  
-🚧 **Planned:** integrated **investment portfolio tracking** and **financial goal planning**!
 
 ---
 
