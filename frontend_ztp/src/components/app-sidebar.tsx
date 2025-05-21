@@ -24,6 +24,7 @@ import {
     DollarSign,
     Settings,
     ChevronUp,
+    ChartNoAxesCombined,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -32,7 +33,7 @@ const menuItems = [
     { title: "Wydatki", path: "/expenses", icon: TrendingDown },
     { title: "Przychody", path: "/income", icon: TrendingUp },
     { title: "Podsumowanie", path: "/summary", icon: DollarSign },
-    { title: "Wykresy", path: "/charts", icon: DollarSign },
+    { title: "Wykresy", path: "/charts", icon: ChartNoAxesCombined },
     { title: "Ustawienia", path: "/settings", icon: Settings },
 ];
 
