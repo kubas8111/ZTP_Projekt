@@ -1,0 +1,17 @@
+# ignoruj katalog node_modules (bo będziesz je instalować wewnątrz kontenera)
+node_modules/
+
+# ignoruj pliki środowiskowe, które zawierają poufne dane
+.env
+.env.local
+
+# ignoruj logi, tymczasowe pliki edytorów itp.
+*.log
+.vscode/
+.idea/
+
+# ignoruj katalogi testowe
+tests/
+
+# 
+dist/

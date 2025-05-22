@@ -122,7 +122,7 @@ export default function ChartPieCategoriesComponent() {
     const id = "pie-interactive";
 
     return (
-        <Card data-chart={id} className="flex flex-col">
+        <Card data-chart={id} className="flex flex-col w-full h-full">
             <ChartStyle id={id} config={chartConfig} />
             <CardHeader className="flex-row items-start space-y-0 pb-0">
                 {/* <div className="grid gap-1">
@@ -246,3 +246,4 @@ export default function ChartPieCategoriesComponent() {
         </Card>
     );
 }
+

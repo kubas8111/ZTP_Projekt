@@ -59,10 +59,10 @@ const ChartBarShops: React.FC = () => {
     }
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center w-full h-full">
             <ChartContainer
                 config={chartConfig}
-                className="min-h-[500px] h-full">
+                className="min-h-[200px] lg:min-h-[500px] h-full">
                 <BarChart data={chartData} height={300}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -109,3 +109,4 @@ const ChartBarShops: React.FC = () => {
 };
 
 export default ChartBarShops;
+

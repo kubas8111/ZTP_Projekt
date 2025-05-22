@@ -50,7 +50,7 @@ const ChartLinesPerson: React.FC = () => {
         return <div className="w-full text-center">Brak danych</div>;
 
     return (
-        <div className="flex flex-col items-center w-full">
+        <div className="flex flex-col items-center w-full h-full">
             <ChartContainer config={chartConfig} className="min-h-[500px]">
                 <AreaChart
                     accessibilityLayer
@@ -141,3 +141,4 @@ const ChartLinesPerson: React.FC = () => {
 };
 
 export default ChartLinesPerson;
+
