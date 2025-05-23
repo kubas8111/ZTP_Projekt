@@ -6,12 +6,6 @@ Welcome to **Expense Tracker** — a sleek, fullstack web application designed t
 
 ---
 
-## 🤔 Why I Built This
-
-As someone who cares about where my money goes (and why it disappears so fast), I built this app to track my expenses with more flexibility than spreadsheets could offer. I wanted **collaborative budgeting**, better **categorization**, and powerful **visualizations** — so I made it myself.
-
----
-
 ## ✨ Key Features
 
 ✅ **Custom expense categories** — groceries, rent, fun stuff, crypto — your call.  
